@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    platform: postges
+    # url: jdbc:postgresql://172.25.160.70:5432/mi-guest-dev
+    url: jdbc:postgresql://localhost:5432/mi-guest-dev
+    username: postgres
+    # password: m1Gu3st*
+    password: 123456
+
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
+server:
+  port: 8090
+
+spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults: false
