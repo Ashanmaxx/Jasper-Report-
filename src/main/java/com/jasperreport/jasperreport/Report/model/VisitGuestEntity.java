@@ -60,5 +60,4 @@ public class VisitGuestEntity {
     @NotEmpty
     private LocalDate createdDate;
 
-
 }
