@@ -28,7 +28,7 @@ public class ReportService {
     private ResourceLoader resourceLoader;
 
     private final String template_path = "C:\\Users\\ashanw\\Desktop\\JasperRepor\\jasperreport\\src\\main\\resources\\guest_list_details.jrxml";
-   // private static final String logo_path = "C:\\Users\\ashanw\\Desktop\\SprinBoot-test\\jasperreport\\Report_template\\MillenniumIT.jpg";
+    // private static final String logo_path = "C:\\Users\\ashanw\\Desktop\\SprinBoot-test\\jasperreport\\Report_template\\MillenniumIT.jpg";
 
     @Spec(entity = VisitGuestEntity.class)
     Specification<VisitGuestEntity> specification;
@@ -71,21 +71,51 @@ public class ReportService {
         return visitGuestEntityList;
     }
 
+//    public byte[] getPdf(List<VisitGuestEntity> visitGuestEntities) throws JRException {
+//
+//        String recordSize = String.valueOf(visitGuestEntities.size());
+//        String created = String.valueOf(LocalDate.now());
+//        byte[] bytes;
+//
+//        JasperReport jasperReport = JasperCompileManager.compileReport(template_path);
+//        JRDataSource jrDataSource = new JRBeanCollectionDataSource(visitGuestEntities);
+//
+//        Map<String, Object> visitGuestMap = new HashMap<>();
+//        visitGuestMap.put("recordSize", recordSize);
+//        visitGuestMap.put("created", created);
+//       // visitGuestMap.put("subReport","C:\\Users\\ashanw\\Desktop\\JasperRepor\\jasperreport\\src\\main\\resources\\Guest_subreport.jrxml");
+//        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, visitGuestMap, jrDataSource);
+//        bytes = JasperExportManager.exportReportToPdf(jasperPrint);
+//        return bytes;
+//    }
+
     public byte[] getPdf(List<VisitGuestEntity> visitGuestEntities) throws JRException {
 
         String recordSize = String.valueOf(visitGuestEntities.size());
         String created = String.valueOf(LocalDate.now());
-        byte[] bytes;
+        byte[] bytes = null;
 
-        JasperReport jasperReport = JasperCompileManager.compileReport(template_path);
-        JRDataSource jrDataSource = new JRBeanCollectionDataSource(visitGuestEntities);
+        try {
+            JasperReport jasperReport = JasperCompileManager.compileReport(template_path);
+            JasperReport jasperReport1 = JasperCompileManager.compileReport("C:\\Users\\ashanw\\Desktop\\JasperRepor\\jasperreport\\src\\main\\resources\\details.jrxml");
+            JRDataSource jrDataSource = new JRBeanCollectionDataSource(visitGuestEntities);
 
-        Map<String, Object> visitGuestMap = new HashMap<>();
-        visitGuestMap.put("recordSize", recordSize);
-        visitGuestMap.put("created", created);
+            Map<String, Object> visitGuestMap = new HashMap<>();
+            visitGuestMap.put("recordSize", recordSize);
+            visitGuestMap.put("created", created);
 
-        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, visitGuestMap, jrDataSource);
-        bytes = JasperExportManager.exportReportToPdf(jasperPrint);
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, visitGuestMap, new JREmptyDataSource());
+            JasperPrint jasperPrint1 = JasperFillManager.fillReport(jasperReport1, visitGuestMap, jrDataSource);
+
+            for (int j = 0; j < jasperPrint1.getPages().size(); j++) {
+                jasperPrint.addPage(jasperPrint1.getPages().get(j));
+            }
+            bytes = JasperExportManager.exportReportToPdf(jasperPrint);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return bytes;
     }
 
