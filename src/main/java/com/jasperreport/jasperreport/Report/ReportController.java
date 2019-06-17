@@ -39,7 +39,7 @@ public class ReportController {
         List<VisitGuestEntity> visitGuestEntities = reportService.getGuestVisitHistory(id, status, createdFrom, createdTo);
 
         // ByteArrayInputStream excelByteArrayInputStream = reportService.getPdf(visitGuestEntities);
-        byte[] bytes = reportService.getPdf(visitGuestEntities);
+        byte[] bytes = reportService.getDynamicPdf(visitGuestEntities);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "attachment; filename=visit" + LocalDate.now() + ".pdf");

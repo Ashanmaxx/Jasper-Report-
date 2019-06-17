@@ -14,6 +14,9 @@ import spec.Spec;
 import spec.Specifications;
 
 import javax.persistence.criteria.Predicate;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -89,28 +92,63 @@ public class ReportService {
 //        return bytes;
 //    }
 
-    public byte[] getPdf(List<VisitGuestEntity> visitGuestEntities) throws JRException {
+//    public byte[] getPdf(List<VisitGuestEntity> visitGuestEntities) throws JRException {
+//
+//        String recordSize = String.valueOf(visitGuestEntities.size());
+//        String created = String.valueOf(LocalDate.now());
+//        byte[] bytes = null;
+//
+//        try {
+//            JasperReport jasperReport = JasperCompileManager.compileReport(template_path);
+//            JasperReport jasperReport1 = JasperCompileManager.compileReport("C:\\Users\\ashanw\\Desktop\\JasperRepor\\jasperreport\\src\\main\\resources\\details.jrxml");
+//            JRDataSource jrDataSource = new JRBeanCollectionDataSource(visitGuestEntities);
+//
+//            Map<String, Object> visitGuestMap = new HashMap<>();
+//            visitGuestMap.put("recordSize", recordSize);
+//            visitGuestMap.put("created", created);
+//
+//            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, visitGuestMap, new JREmptyDataSource());
+//            JasperPrint jasperPrint1 = JasperFillManager.fillReport(jasperReport1, visitGuestMap, jrDataSource);
+//
+//            for (int j = 0; j < jasperPrint1.getPages().size(); j++) {
+//                jasperPrint.addPage(jasperPrint1.getPages().get(j));
+//            }
+//            bytes = JasperExportManager.exportReportToPdf(jasperPrint);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        return bytes;
+//    }
+
+    public byte[] getDynamicPdf(List<VisitGuestEntity> visitGuestEntities) throws JRException {
 
         String recordSize = String.valueOf(visitGuestEntities.size());
         String created = String.valueOf(LocalDate.now());
         byte[] bytes = null;
 
         try {
-            JasperReport jasperReport = JasperCompileManager.compileReport(template_path);
-            JasperReport jasperReport1 = JasperCompileManager.compileReport("C:\\Users\\ashanw\\Desktop\\JasperRepor\\jasperreport\\src\\main\\resources\\details.jrxml");
+
+         //   JasperReport jasperReport = JasperCompileManager.compileReport(template_path);
+            JasperReport jasperReport1 = JasperCompileManager.compileReport("C:\\Users\\ashanw\\Desktop\\JasperRepor\\jasperreport\\src\\main\\resources\\ex1.jrxml");
             JRDataSource jrDataSource = new JRBeanCollectionDataSource(visitGuestEntities);
 
             Map<String, Object> visitGuestMap = new HashMap<>();
-            visitGuestMap.put("recordSize", recordSize);
-            visitGuestMap.put("created", created);
+          //  visitGuestMap.put("recordSize", recordSize);
+          //  visitGuestMap.put("created", created);
+            visitGuestMap.put("datasource",jrDataSource);
+            visitGuestMap.put("showOut",false);
+//            Map<String, Object> stringObjectMap = new HashMap<>();
+//           stringObjectMap.put("ItemDataSource",jrDataSource);
 
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, visitGuestMap, new JREmptyDataSource());
-            JasperPrint jasperPrint1 = JasperFillManager.fillReport(jasperReport1, visitGuestMap, jrDataSource);
+           // JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, visitGuestMap, new JREmptyDataSource());
+            JasperPrint jasperPrint1 = JasperFillManager.fillReport(jasperReport1, visitGuestMap,new JREmptyDataSource());
 
-            for (int j = 0; j < jasperPrint1.getPages().size(); j++) {
-                jasperPrint.addPage(jasperPrint1.getPages().get(j));
-            }
-            bytes = JasperExportManager.exportReportToPdf(jasperPrint);
+//            for (int j = 0; j < jasperPrint1.getPages().size(); j++) {
+//                jasperPrint.addPage(jasperPrint1.getPages().get(j));
+//            }
+            bytes = JasperExportManager.exportReportToPdf(jasperPrint1);
 
         } catch (Exception e) {
             e.printStackTrace();

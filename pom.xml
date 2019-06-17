@@ -59,6 +59,12 @@
             <version>1.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>ar.com.fdvs</groupId>
+            <artifactId>DynamicJasper</artifactId>
+            <version>5.1.2</version>
+        </dependency>
+
     </dependencies>
 
     <build>
