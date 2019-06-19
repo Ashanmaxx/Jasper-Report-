@@ -1,19 +1,21 @@
 package com.jasperreport.jasperreport.Report;
 
+import ar.com.fdvs.dj.core.DynamicJasperHelper;
+import ar.com.fdvs.dj.core.layout.ClassicLayoutManager;
+import ar.com.fdvs.dj.core.layout.LayoutManager;
+import ar.com.fdvs.dj.domain.DynamicReport;
+import ar.com.fdvs.dj.domain.Style;
+import ar.com.fdvs.dj.domain.builders.ColumnBuilder;
+import ar.com.fdvs.dj.domain.builders.DynamicReportBuilder;
+import ar.com.fdvs.dj.domain.constants.HorizontalAlign;
+import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
 import com.jasperreport.jasperreport.Report.model.VisitGuestEntity;
 import com.jasperreport.jasperreport.Report.model.VisitGuetEntityRepository;
 
-import net.sf.jasperreports.crosstabs.JRCrosstab;
-import net.sf.jasperreports.crosstabs.JRCrosstabCell;
-import net.sf.jasperreports.crosstabs.JRCrosstabColumnGroup;
-import net.sf.jasperreports.crosstabs.design.JRDesignCellContents;
-import net.sf.jasperreports.crosstabs.design.JRDesignCrosstab;
-import net.sf.jasperreports.crosstabs.design.JRDesignCrosstabCell;
+
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.engine.design.JRDesignTextField;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import spec.PredicateBuilder;
@@ -21,9 +23,6 @@ import spec.Spec;
 import spec.Specifications;
 
 import javax.persistence.criteria.Predicate;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -33,16 +32,10 @@ public class ReportService {
 
     @Autowired
     private VisitGuetEntityRepository visitGuetEntityRepository;
-
-    @Autowired
-    private ResourceLoader resourceLoader;
-
     private final String template_path = "C:\\Users\\ashanw\\Desktop\\JasperRepor\\jasperreport\\src\\main\\resources\\guest_list_details.jrxml";
-    // private static final String logo_path = "C:\\Users\\ashanw\\Desktop\\SprinBoot-test\\jasperreport\\Report_template\\MillenniumIT.jpg";
 
     @Spec(entity = VisitGuestEntity.class)
     Specification<VisitGuestEntity> specification;
-
 
     public List<VisitGuestEntity> getGuestVisitHistory(String id, String status, LocalDate createdFrom, LocalDate createdTo) {
 
@@ -58,15 +51,12 @@ public class ReportService {
                     .like("identification", "%" + id.toLowerCase() + "%")
                     .build());
         }
-
         if (createdFrom != null && createdTo == null) {
             createdTo = createdFrom;
         }
-
         if (createdFrom == null && createdTo != null) {
             createdFrom = createdTo;
         }
-
         if (createdFrom != null && createdTo != null) {
             predicate = predicate.between("createdDate", createdFrom, createdTo);
         }
@@ -81,105 +71,85 @@ public class ReportService {
         return visitGuestEntityList;
     }
 
-//    public byte[] getPdf(List<VisitGuestEntity> visitGuestEntities) throws JRException {
-//
-//        String recordSize = String.valueOf(visitGuestEntities.size());
-//        String created = String.valueOf(LocalDate.now());
-//        byte[] bytes;
-//
-//        JasperReport jasperReport = JasperCompileManager.compileReport(template_path);
-//        JRDataSource jrDataSource = new JRBeanCollectionDataSource(visitGuestEntities);
-//
-//        Map<String, Object> visitGuestMap = new HashMap<>();
-//        visitGuestMap.put("recordSize", recordSize);
-//        visitGuestMap.put("created", created);
-//       // visitGuestMap.put("subReport","C:\\Users\\ashanw\\Desktop\\JasperRepor\\jasperreport\\src\\main\\resources\\Guest_subreport.jrxml");
-//        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, visitGuestMap, jrDataSource);
-//        bytes = JasperExportManager.exportReportToPdf(jasperPrint);
-//        return bytes;
-//    }
-
-//    public byte[] getPdf(List<VisitGuestEntity> visitGuestEntities) throws JRException {
-//
-//        String recordSize = String.valueOf(visitGuestEntities.size());
-//        String created = String.valueOf(LocalDate.now());
-//        byte[] bytes = null;
-//
-//        try {
-//            JasperReport jasperReport = JasperCompileManager.compileReport(template_path);
-//            JasperReport jasperReport1 = JasperCompileManager.compileReport("C:\\Users\\ashanw\\Desktop\\JasperRepor\\jasperreport\\src\\main\\resources\\details.jrxml");
-//            JRDataSource jrDataSource = new JRBeanCollectionDataSource(visitGuestEntities);
-//
-//            Map<String, Object> visitGuestMap = new HashMap<>();
-//            visitGuestMap.put("recordSize", recordSize);
-//            visitGuestMap.put("created", created);
-//
-//            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, visitGuestMap, new JREmptyDataSource());
-//            JasperPrint jasperPrint1 = JasperFillManager.fillReport(jasperReport1, visitGuestMap, jrDataSource);
-//
-//            for (int j = 0; j < jasperPrint1.getPages().size(); j++) {
-//                jasperPrint.addPage(jasperPrint1.getPages().get(j));
-//            }
-//            bytes = JasperExportManager.exportReportToPdf(jasperPrint);
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        return bytes;
-//    }
-
-//    public byte[] getDynamicPdf(List<VisitGuestEntity> visitGuestEntities) throws JRException {
-//
-//        String recordSize = String.valueOf(visitGuestEntities.size());
-//        String created = String.valueOf(LocalDate.now());
-//        byte[] bytes = null;
-//
-//        try {
-//
-//         //   JasperReport jasperReport = JasperCompileManager.compileReport(template_path);
-//            JasperReport jasperReport1 = JasperCompileManager.compileReport("C:\\Users\\ashanw\\Desktop\\JasperRepor\\jasperreport\\src\\main\\resources\\ex1.jrxml");
-//            JRDataSource jrDataSource = new JRBeanCollectionDataSource(visitGuestEntities);
-//
-//            Map<String, Object> visitGuestMap = new HashMap<>();
-//          //  visitGuestMap.put("recordSize", recordSize);
-//          //  visitGuestMap.put("created", created);
-//            visitGuestMap.put("datasource",jrDataSource);
-//            visitGuestMap.put("showOut",false);
-////            Map<String, Object> stringObjectMap = new HashMap<>();
-////           stringObjectMap.put("ItemDataSource",jrDataSource);
-//
-//           // JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, visitGuestMap, new JREmptyDataSource());
-//            JasperPrint jasperPrint1 = JasperFillManager.fillReport(jasperReport1, visitGuestMap,new JREmptyDataSource());
-//
-////            for (int j = 0; j < jasperPrint1.getPages().size(); j++) {
-////                jasperPrint.addPage(jasperPrint1.getPages().get(j));
-////            }
-//            bytes = JasperExportManager.exportReportToPdf(jasperPrint1);
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        return bytes;
-//    }
-
     public byte[] getDynamicPdf(List<VisitGuestEntity> visitGuestEntities) throws JRException {
-
         byte[] bytes = null;
         try {
-            JasperReport jasperReport1 = JasperCompileManager.compileReport("C:\\Users\\ashanw\\Desktop\\JasperRepor\\jasperreport\\src\\main\\resources\\ex1.jrxml");
+            ReportService reportService = new ReportService();
+            DynamicReport dynamicReport = reportService.createDesign();
             JRDataSource jrDataSource = new JRBeanCollectionDataSource(visitGuestEntities);
             Map<String, Object> visitGuestMap = new HashMap<>();
-            visitGuestMap.put("datasource", jrDataSource);
-            visitGuestMap.put("showOut", false);
-            JasperPrint jasperPrint1 = JasperFillManager.fillReport(jasperReport1, visitGuestMap, new JREmptyDataSource());
+            JasperReport jasperReport1 = DynamicJasperHelper.generateJasperReport(dynamicReport, getLayoutManager(), visitGuestMap);
+            JasperPrint jasperPrint1 = JasperFillManager.fillReport(jasperReport1, visitGuestMap, jrDataSource);
             bytes = JasperExportManager.exportReportToPdf(jasperPrint1);
         } catch (
                 Exception e) {
             e.printStackTrace();
         }
         return bytes;
+    }
+
+    public DynamicReport createDesign() throws JRException {
+
+        Style detailStyle = new Style();
+        Style headerStyle = new Style();
+
+        Style titleStyle = new Style();
+        Style subtitleStyle = new Style();
+        Style amountStyle = new Style();
+        amountStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
+
+        DynamicReportBuilder drb = new DynamicReportBuilder();
+        drb.setTitle("MI-GUEST")
+                .setSubtitle("Guest Report List")
+                .setDetailHeight(15)
+                .setMargins(30, 20, 30, 15)
+                .setDefaultStyles(titleStyle, subtitleStyle, headerStyle, detailStyle)
+                .setColumnsPerPage(1);
+
+        AbstractColumn colName = ColumnBuilder.getNew()
+                .setColumnProperty("name", String.class.getName())
+                .setTitle("Name").setWidth(85)
+                .build();
+
+        AbstractColumn colMobile = ColumnBuilder.getNew()
+                .setColumnProperty("mobile", String.class.getName())
+                .setTitle("Mobile").setWidth(85)
+                .build();
+
+        AbstractColumn identifictionCol = ColumnBuilder.getNew()
+                .setColumnProperty("identification", String.class.getName())
+                .setTitle("Identification").setWidth(85)
+                .build();
+
+        AbstractColumn idTypeCol = ColumnBuilder.getNew()
+                .setColumnProperty("idType", String.class.getName())
+                .setTitle("ID Type").setWidth(85)
+                .build();
+
+        AbstractColumn hostCol = ColumnBuilder.getNew()
+                .setColumnProperty("host", String.class.getName())
+                .setTitle("Host").setWidth(85)
+                .build();
+
+        AbstractColumn hostEmailCol = ColumnBuilder.getNew()
+                .setColumnProperty("hostEmail", String.class.getName())
+                .setTitle("Host Email").setWidth(85)
+                .build();
+
+        drb.addColumn(colName);
+        drb.addColumn(colMobile);
+        drb.addColumn(identifictionCol);
+        drb.addColumn(idTypeCol);
+        drb.addColumn(hostCol);
+        drb.addColumn(hostEmailCol);
+
+        drb.setUseFullPageWidth(true);
+        DynamicReport dr = drb.build();
+        return dr;
+    }
+
+    protected LayoutManager getLayoutManager() {
+        return new ClassicLayoutManager();
     }
 
 }
