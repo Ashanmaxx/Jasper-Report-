@@ -104,7 +104,6 @@ public class ReportService {
         }
         return bytes;
     }
-
     public DynamicReport createDesign() throws JRException{
 
         Style detailStyle = new Style();
@@ -164,7 +163,6 @@ public class ReportService {
         DynamicReport dr = drb.build();
         return dr;
     }
-
     protected LayoutManager getLayoutManager() {
         return new ClassicLayoutManager();
     }
