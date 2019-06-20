@@ -32,7 +32,7 @@ public class ReportService {
 
     @Autowired
     private VisitGuetEntityRepository visitGuetEntityRepository;
-    private final String template_path = "C:\\Users\\ashanw\\Desktop\\JasperRepor\\jasperreport\\src\\main\\resources\\guest_list_details.jrxml";
+    private final String template_path = "C:\\Users\\ashanw\\Desktop\\JasperRepor\\jasperreport\\src\\main\\resources\\MainPage.jrxml";
 
     @Spec(entity = VisitGuestEntity.class)
     Specification<VisitGuestEntity> specification;
@@ -74,12 +74,29 @@ public class ReportService {
     public byte[] getDynamicPdf(List<VisitGuestEntity> visitGuestEntities) throws JRException {
         byte[] bytes = null;
         try {
+            //Load MainPag
+            JasperReport  mainPageJasper=JasperCompileManager.compileReport(template_path);
+            //Create Dynamic Jasper report
             ReportService reportService = new ReportService();
             DynamicReport dynamicReport = reportService.createDesign();
             JRDataSource jrDataSource = new JRBeanCollectionDataSource(visitGuestEntities);
             Map<String, Object> visitGuestMap = new HashMap<>();
-            JasperReport jasperReport1 = DynamicJasperHelper.generateJasperReport(dynamicReport, getLayoutManager(), visitGuestMap);
-            JasperPrint jasperPrint1 = JasperFillManager.fillReport(jasperReport1, visitGuestMap, jrDataSource);
+            JasperReport dynamicJasper = DynamicJasperHelper.generateJasperReport(dynamicReport, getLayoutManager(), visitGuestMap);
+
+            //get record size and date
+            int recordSize=visitGuestEntities.size();
+            String createdDate=LocalDate.now().toString();
+            Map<String, Object> mainPageMap = new HashMap<>();
+            mainPageMap.put("recordSize",recordSize);
+            mainPageMap.put("createdDate",createdDate);
+
+            JasperPrint jasperPrint1 =JasperFillManager.fillReport(mainPageJasper,mainPageMap,new JREmptyDataSource());
+            JasperPrint jasperPrint2 = JasperFillManager.fillReport(dynamicJasper, visitGuestMap, jrDataSource);
+
+            //Combine two jasper reports
+            for(int i=0;i<jasperPrint2.getPages().size();i++){
+                jasperPrint1.addPage(jasperPrint2.getPages().get(i));
+            }
             bytes = JasperExportManager.exportReportToPdf(jasperPrint1);
         } catch (
                 Exception e) {
@@ -88,7 +105,7 @@ public class ReportService {
         return bytes;
     }
 
-    public DynamicReport createDesign() throws JRException {
+    public DynamicReport createDesign() throws JRException{
 
         Style detailStyle = new Style();
         Style headerStyle = new Style();
