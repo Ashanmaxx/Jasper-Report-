@@ -7,7 +7,10 @@ import ar.com.fdvs.dj.domain.DynamicReport;
 import ar.com.fdvs.dj.domain.Style;
 import ar.com.fdvs.dj.domain.builders.ColumnBuilder;
 import ar.com.fdvs.dj.domain.builders.DynamicReportBuilder;
+import ar.com.fdvs.dj.domain.constants.Border;
+import ar.com.fdvs.dj.domain.constants.Font;
 import ar.com.fdvs.dj.domain.constants.HorizontalAlign;
+import ar.com.fdvs.dj.domain.constants.VerticalAlign;
 import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
 import com.jasperreport.jasperreport.Report.model.VisitGuestEntity;
 import com.jasperreport.jasperreport.Report.model.VisitGuetEntityRepository;
@@ -23,8 +26,10 @@ import spec.Spec;
 import spec.Specifications;
 
 import javax.persistence.criteria.Predicate;
+import java.awt.*;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.List;
 
 
 @Service
@@ -74,11 +79,11 @@ public class ReportService {
     public byte[] getDynamicPdf(List<VisitGuestEntity> visitGuestEntities) throws JRException {
         byte[] bytes = null;
         try {
-            //Load MainPag
+            //Load MainPage
             JasperReport  mainPageJasper=JasperCompileManager.compileReport(template_path);
             //Create Dynamic Jasper report
             ReportService reportService = new ReportService();
-            DynamicReport dynamicReport = reportService.createDesign();
+            DynamicReport dynamicReport = reportService.createDesign(6);
             JRDataSource jrDataSource = new JRBeanCollectionDataSource(visitGuestEntities);
             Map<String, Object> visitGuestMap = new HashMap<>();
             JasperReport dynamicJasper = DynamicJasperHelper.generateJasperReport(dynamicReport, getLayoutManager(), visitGuestMap);
@@ -104,10 +109,22 @@ public class ReportService {
         }
         return bytes;
     }
-    public DynamicReport createDesign() throws JRException{
+    public DynamicReport createDesign(int noOfColumns) throws JRException{
+
+         int columnWidth=595/noOfColumns;
 
         Style detailStyle = new Style();
+        detailStyle.setVerticalAlign(VerticalAlign.MIDDLE);
+        detailStyle.setHorizontalAlign(HorizontalAlign.LEFT);
+        detailStyle.setBorder(Border.PEN_1_POINT());
+
+
         Style headerStyle = new Style();
+        headerStyle.setBorder(Border.PEN_1_POINT());
+        headerStyle.setFont(Font.ARIAL_MEDIUM_BOLD);
+        headerStyle.setHorizontalAlign(HorizontalAlign.CENTER);
+        headerStyle.setVerticalAlign(VerticalAlign.MIDDLE);
+        headerStyle.setBackgroundColor(Color.cyan);
 
         Style titleStyle = new Style();
         Style subtitleStyle = new Style();
@@ -122,34 +139,35 @@ public class ReportService {
                 .setDefaultStyles(titleStyle, subtitleStyle, headerStyle, detailStyle)
                 .setColumnsPerPage(1);
 
+
         AbstractColumn colName = ColumnBuilder.getNew()
                 .setColumnProperty("name", String.class.getName())
-                .setTitle("Name").setWidth(85)
+                .setTitle("Name").setWidth(columnWidth)
                 .build();
 
         AbstractColumn colMobile = ColumnBuilder.getNew()
                 .setColumnProperty("mobile", String.class.getName())
-                .setTitle("Mobile").setWidth(85)
+                .setTitle("Mobile").setWidth(columnWidth)
                 .build();
 
         AbstractColumn identifictionCol = ColumnBuilder.getNew()
                 .setColumnProperty("identification", String.class.getName())
-                .setTitle("Identification").setWidth(85)
+                .setTitle("Identification").setWidth(columnWidth)
                 .build();
 
         AbstractColumn idTypeCol = ColumnBuilder.getNew()
                 .setColumnProperty("idType", String.class.getName())
-                .setTitle("ID Type").setWidth(85)
+                .setTitle("ID Type").setWidth(columnWidth)
                 .build();
 
         AbstractColumn hostCol = ColumnBuilder.getNew()
                 .setColumnProperty("host", String.class.getName())
-                .setTitle("Host").setWidth(85)
+                .setTitle("Host").setWidth(columnWidth)
                 .build();
 
         AbstractColumn hostEmailCol = ColumnBuilder.getNew()
                 .setColumnProperty("hostEmail", String.class.getName())
-                .setTitle("Host Email").setWidth(85)
+                .setTitle("Host Email").setWidth(columnWidth)
                 .build();
 
         drb.addColumn(colName);
@@ -157,7 +175,7 @@ public class ReportService {
         drb.addColumn(identifictionCol);
         drb.addColumn(idTypeCol);
         drb.addColumn(hostCol);
-        drb.addColumn(hostEmailCol);
+//        drb.addColumn(hostEmailCol);
 
         drb.setUseFullPageWidth(true);
         DynamicReport dr = drb.build();
@@ -166,5 +184,4 @@ public class ReportService {
     protected LayoutManager getLayoutManager() {
         return new ClassicLayoutManager();
     }
-
 }
